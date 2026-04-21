@@ -5,9 +5,18 @@ from langchain_core.messages import HumanMessage
 # Config
 CONFIG = {'configurable': {'thread_id': 'thread-1'}}
 
-# Initialize session state
+# ******************************* Initialize session state********************************
 if 'message_history' not in st.session_state:
     st.session_state['message_history'] = []
+    
+# ******************************* sidebar ui **********************************************
+
+st.sidebar.title("Langraph Chatbot")
+
+st.sidebar.button('new chat')
+
+st.sidebar.header('my conversations')
+
 
 # Display previous messages
 for message in st.session_state['message_history']:
