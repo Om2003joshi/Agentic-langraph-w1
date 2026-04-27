@@ -1,13 +1,23 @@
 import streamlit as st
 from langraph_backend import chatbot
 from langchain_core.messages import HumanMessage
+import uuid
 
 # st.session_state -> dict -> 
 CONFIG = {'configurable': {'thread_id': 'thread-1'}}
 
+# ******************************************** utility functions ***********************************************
+def generate_thread_id():
+    thread_id = uuid.uuid4()
+    return thread_id
+
 # ******************************************** Session Setup ***********************************************
 if 'message_history' not in st.session_state:
     st.session_state['message_history'] = []
+    
+if 'thread_id' not in st.session_state:
+    st.session_state['thread_id'] = generate_thread_id()
+     
 
 # ******************************************** siderbar ui *************************************************
 
@@ -16,6 +26,8 @@ st.sidebar.title("Langraph Chatbot")
 st.sidebar.button("new chat")
 
 st.sidebar.header("My conversations")
+
+st.sidebar.text(st.session_state['thread_id'])
 
 # ******************************************** for main ui *************************************************
 # loading the conversation history
