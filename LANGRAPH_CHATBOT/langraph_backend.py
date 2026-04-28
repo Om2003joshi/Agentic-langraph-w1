@@ -1,11 +1,13 @@
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated
 from langchain_core.messages import BaseMessage,HumanMessage
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph.message import add_messages
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
 import os
+import sqlite3
+
 # Load environment variables from .env
 load_dotenv(override=True)
 print("LOADED KEY:", os.environ.get("GOOGLE_API_KEY"))
@@ -24,8 +26,12 @@ def chat_node(state: ChatState):
     response = llm.invoke(messages)
     return {"messages": [response]}
 
+
+conn=sqlite3.connect(database="chatbot.db" , check_same_thread=False)
+
+
 # Checkpointer
-checkpointer = InMemorySaver()
+checkpointer = SqliteSaver(conn=conn)
 
 graph = StateGraph(ChatState)
 graph.add_node("chat_node", chat_node)
