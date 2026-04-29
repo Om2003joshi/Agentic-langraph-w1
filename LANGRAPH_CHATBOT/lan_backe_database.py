@@ -1,0 +1,59 @@
+from langgraph.graph import StateGraph, START, END
+from typing import TypedDict, Annotated
+from langchain_core.messages import BaseMessage,HumanMessage
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.graph.message import add_messages
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+import sqlite3
+
+# Load environment variables from .env
+load_dotenv(override=True)
+print("LOADED KEY:", os.environ.get("GOOGLE_API_KEY"))
+# Initialize the LLM
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",                   # correct parameter
+    google_api_key=os.environ["GOOGLE_API_KEY"],  # correct parameter
+    temperature=0
+)
+
+class ChatState(TypedDict):
+    messages: Annotated[list[BaseMessage], add_messages]
+
+def chat_node(state: ChatState):
+    messages = state['messages']
+    response = llm.invoke(messages)
+    return {"messages": [response]}
+
+
+conn=sqlite3.connect(database="chatbot.db" , check_same_thread=False)
+
+
+# Checkpointer
+checkpointer = SqliteSaver(conn=conn)
+
+graph = StateGraph(ChatState)
+graph.add_node("chat_node", chat_node)
+graph.add_edge(START, "chat_node")
+graph.add_edge("chat_node", END)
+
+chatbot = graph.compile(checkpointer=checkpointer)
+
+def retrieve_all_threads():
+    all_threads = set()
+    for checkpoint in checkpointer.list(None):
+        all_threads.add(checkpoint.config['configurable']['thread_id'])
+
+    return list(all_threads)
+
+
+# for message_chunk , metadata in chatbot.stream(
+#     {"messages": [HumanMessage(content="what is recipe to make pasta?")]},
+#     config={'configurable': {'thread_id': 'thread-1'}},
+#     stream_mode="messages"
+#     ):
+    
+#     if message_chunk.content:
+#         print(message_chunk.content,end="",flush=True)
+ 
