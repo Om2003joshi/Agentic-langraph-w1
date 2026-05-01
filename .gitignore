@@ -205,3 +205,23 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+# Database files
+*.db
+*.sqlite3
+*.bin
+
+# Model files (important for ML/LLMOps)
+*.pt
+*.pth
+*.h5
+*.ckpt
+
+# Large data files
+*.csv
+*.zip
+*.tar.gz
+
+# Logs
+logs/
