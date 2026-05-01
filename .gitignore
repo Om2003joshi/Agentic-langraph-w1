@@ -225,3 +225,14 @@ __marimo__/
 
 # Logs
 logs/
+
+# SQLite database
+*.db
+
+# SQLite temp / WAL / bin files
+*.db-*
+*.bin
+
+# Optional (extra safety)
+*.sqlite
+*.sqlite3
